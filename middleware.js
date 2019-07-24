@@ -1,6 +1,8 @@
 let jwt = require('jsonwebtoken');
 const env = require('./.env.js');
 
+// needs to authorize post with id of logged in user
+
 let checkToken = (req, res, next) => {
   let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase
 
@@ -18,7 +20,9 @@ let checkToken = (req, res, next) => {
         });
       } else {
         req.decoded = decoded;
-        next();
+        if(decoded.id===req.params.id){
+          next();
+        }
       }
     });
   } else {
