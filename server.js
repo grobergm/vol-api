@@ -90,14 +90,14 @@ app.post('/api/register', (req,res)=>{
 });
 
 app.get('/api/projects/:id',(req,res)=>{
-  Project.find({id:req.params.id},(err,projects)=>{
+  Project.find({host:req.params.id},(err,projects)=>{
     if(err){
       console.log(err)
     } else {
       res.json({
         success: true,
-          message: 'got the projects',
-          projects:projects,
+        message: 'got the projects',
+        projects:projects,
       })
     }
   })
