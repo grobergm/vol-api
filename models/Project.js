@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const ProjectSchema = new mongoose.Schema({
 	name: { type: String, required: true },
 	host:{ type: mongoose.Schema.Types.ObjectId, ref:"User" },
-	goals:[],
-  actions:[],
+	tasks:[],
   volunteers:[{ type: mongoose.Schema.Types.ObjectId, ref:"User" }]
 });
 

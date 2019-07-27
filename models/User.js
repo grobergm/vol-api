@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
   skills:{ type: Array },
   impacts:{ type: Array },
   friends:[{ type: mongoose.Schema.Types.ObjectId, ref:"User" }],
-  projects:[{ type: mongoose.Schema.Types.ObjectId, ref:"Projects" }],
+  projects:[{ type: mongoose.Schema.Types.ObjectId, ref:"Project" }],
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -26,11 +26,10 @@ mongoose.connect(mongo_uri, { useNewUrlParser: true }, function(err) {
   }
 });
 
-// Checks username and password, 
-app.post('/api/authenticate', (req,res)=>{
-  const {email,password} = req.body;
-  if (email && password){
-    User.findOne({email},(err,user)=>{
+// get a users profile
+
+app.get('/api/users/:email',(req,res)=>{
+  User.findOne({email:req.params.email},(err,user)=>{
       if (err){
         res.json({
           success: false,
@@ -39,7 +38,35 @@ app.post('/api/authenticate', (req,res)=>{
       } else if (!user) {
          res.json({
           success: false,
-          message: 'Email and Password do not match existing users'
+          message: 'No User Found'
+        })
+      } else {
+        res.json({
+          success: true,
+          message: 'Found User',
+          profile:user,
+        });
+      }
+    });
+})
+
+// Checks username and password, 
+app.post('/api/authenticate', (req,res)=>{
+  const {email,password} = req.body;
+  if (email && password){
+    User.findOne({email})
+    .populate('friends')
+    .populate('projects')
+    .exec((err,user)=>{
+      if (err){
+        res.json({
+          success: false,
+          message: err
+        })
+      } else if (!user) {
+         res.json({
+          success: false,
+          message: 'No User Found'
         })
       } else {
         bcrypt.compare(password, user.hash, function(err, validPassword) {
@@ -48,6 +75,7 @@ app.post('/api/authenticate', (req,res)=>{
               env.secret,
               { expiresIn: '24h' }
             );
+            console.log(user)
             res.json({
               success: true,
               message: 'Authentication successful!',
@@ -58,8 +86,6 @@ app.post('/api/authenticate', (req,res)=>{
         });
       }
     })
-    .populate('friends')
-    .populate('projects')
   }
 });
 
@@ -91,7 +117,7 @@ app.post('/api/register', (req,res)=>{
 });
 
 // Follow a friend
-app.put('/api/addFriend/:id',middleware.checkToken,(req,res)=>{
+app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
   User.findOne({_id:req.params.id},(err,user)=>{
     if(err){
       res.json({
@@ -122,24 +148,22 @@ app.put('/api/addFriend/:id',middleware.checkToken,(req,res)=>{
 
 // Load Projects for Host ID 
 
-// (((I'm trying populate instead)))
-
-// app.get('/api/projects/:id',(req,res)=>{
-//   Project.find({host:req.params.id},(err,projects)=>{
-//     if(err){
-//       res.json({
-//         success: false,
-//         message: err,
-//       })
-//     } else {
-//       res.json({
-//         success: true,
-//         message: 'got the projects',
-//         projects: projects,
-//       })
-//     }
-//   })
-// })
+app.get('/api/projects/:id',(req,res)=>{
+  Project.find({host:req.params.id},(err,projects)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      res.json({
+        success: true,
+        message: 'got the projects',
+        projects: projects,
+      })
+    }
+  })
+})
 
 // Add New Project
 app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
@@ -154,9 +178,29 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
         message: err,
       })
     } else {
-      res.json({
-        success: true,
-        message: 'New Project Saved!'
+        // pull this out into its own function
+       User.findOne({_id:req.params.id},(err,user)=>{
+        if(err){
+          res.json({
+            success: false,
+            message: err,
+          })
+        } else {
+            user.projects.push(newProject._id)
+            user.save(err=>{
+              if(err){
+                res.json({
+                  success: false,
+                  message: err,
+                })
+              } else{
+                res.json({
+                success: true,
+                message: 'Added Project',
+              })
+              }
+            })
+        }
       })
     }
   })
