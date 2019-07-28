@@ -5,6 +5,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+
 const saltRounds = 10;
 
 const env = require('./.env.js');
@@ -30,24 +31,24 @@ mongoose.connect(mongo_uri, { useNewUrlParser: true }, function(err) {
 
 app.get('/api/users/:email',(req,res)=>{
   User.findOne({email:req.params.email},(err,user)=>{
-      if (err){
-        res.json({
-          success: false,
-          message: err
-        })
-      } else if (!user) {
-         res.json({
-          success: false,
-          message: 'No User Found'
-        })
-      } else {
-        res.json({
-          success: true,
-          message: 'Found User',
-          profile:user,
-        });
-      }
-    });
+    if (err){
+      res.json({
+        success: false,
+        message: err
+      })
+    } else if (!user) {
+       res.json({
+        success: false,
+        message: 'No User Found'
+      })
+    } else {
+      res.json({
+        success: true,
+        message: 'Found User',
+        profile:user,
+      });
+    }
+  });
 })
 
 // Checks username and password, 
@@ -75,7 +76,6 @@ app.post('/api/authenticate', (req,res)=>{
               env.secret,
               { expiresIn: '24h' }
             );
-            console.log(user)
             res.json({
               success: true,
               message: 'Authentication successful!',
@@ -143,7 +143,21 @@ app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
   })
 })
 
-// Load users from set of id's (friends, or volunteers)
+app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
+  User.findOneAndDelete({_id:req.params.id},(err)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      res.json({
+        success: true,
+        message: "Account Deleted :(",
+      })
+    }
+  })
+})
 
 
 // Load Projects for Host ID 
@@ -229,6 +243,23 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
           message: 'Signed up for project',
         })
         }
+      })
+    }
+  })
+})
+
+// Delete a project
+app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
+  Project.findOneAndDelete({host:req.params.id},(err)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      res.json({
+        success: true,
+        message: "Project Deleted",
       })
     }
   })
