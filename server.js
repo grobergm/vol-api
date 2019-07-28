@@ -108,13 +108,42 @@ app.post('/api/register', (req,res)=>{
         res.json({
           success: true,
           message: 'Authentication successful!',
-          profile:newUser,
+          profile: newUser,
           token: token
         });
       }
     })
   })
 });
+
+// add activity to timeline
+
+app.put('/api/users/timeline/:id',middleware.checkToken,(req,res)=>{
+  User.findOne({_id:req.params.id},(err,user)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      user.timeLine.unshift(req.body.activity)
+      user.save(err=>{
+        if(err){
+        res.json({
+          success: false,
+          message: err,
+        })
+        } else{
+          res.json({
+          success: true,
+          message: 'added activity',
+        })
+        }
+      })
+    }
+  })
+}) 
+
 
 // Follow a friend
 app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
@@ -135,7 +164,7 @@ app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
           } else{
             res.json({
             success: true,
-            message: 'Added Friend!',
+            message: 'started following',
           })
           }
         })
@@ -153,7 +182,7 @@ app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
     } else {
       res.json({
         success: true,
-        message: "Account Deleted :(",
+        message: "account Deleted :(",
       })
     }
   })
@@ -192,7 +221,6 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
         message: err,
       })
     } else {
-        // pull this out into its own function
        User.findOne({_id:req.params.id},(err,user)=>{
         if(err){
           res.json({
@@ -200,20 +228,20 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
             message: err,
           })
         } else {
-            user.projects.push(newProject._id)
-            user.save(err=>{
-              if(err){
-                res.json({
-                  success: false,
-                  message: err,
-                })
-              } else{
-                res.json({
-                success: true,
-                message: 'Added Project',
+          user.projects.push(newProject._id)
+          user.save(err=>{
+            if(err){
+              res.json({
+                success: false,
+                message: err,
               })
-              }
+            } else{
+              res.json({
+              success: true,
+              message: 'added new project',
             })
+            }
+          })
         }
       })
     }
@@ -240,13 +268,71 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
         } else{
           res.json({
           success: true,
-          message: 'Signed up for project',
+          message: 'signed up for project',
         })
         }
       })
     }
   })
 })
+
+// assign volunteer to task
+
+app.put('/api/projects/assign/:id',middleware.checkToken,(req,res)=>{
+  Project.findOne({_id:req.body.projectId},(err,project)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      project.tasks[req.body.taskId].volunteers.unshift(req.body.volunteerId)
+      project.save(err=>{
+        if(err){
+          res.json({
+            success: false,
+            message: err,
+          })
+        } else{
+          res.json({
+          success: true,
+          message: 'Assigned volunteer to project',
+        })
+        }
+      })
+    }
+  })
+})
+
+// mark task as complete
+
+app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
+  Project.findOne({_id:req.body.projectId},(err,project)=>{
+    if(err){
+      res.json({
+        success: false,
+        message: err,
+      })
+    } else {
+      project.tasks[req.body.taskId].complete=true;
+      project.save(err=>{
+        if(err){
+          res.json({
+            success: false,
+            message: err,
+          })
+        } else{
+          res.json({
+          success: true,
+          message: 'Task is complete',
+        })
+        }
+      })
+    }
+  })
+})
+
+
 
 // Delete a project
 app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
