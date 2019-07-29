@@ -5,7 +5,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const Moment = require('moment')
+const moment = require('moment')
 const saltRounds = 10;
 
 const env = require('./.env.js');
@@ -97,7 +97,7 @@ app.post('/api/register', (req,res)=>{
       name,
       email,
       hash,
-      timeLine:[{description:"Created Profile",date:new Moment()}]
+      timeLine:[{description:"Created Profile",date: moment()}]
     })
     newUser.save(err=>{
        if (err){
@@ -132,7 +132,7 @@ app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
       })
     } else {
         user.friends.push(req.body.friendId)
-        user.timeLine.unshift({description:`Started Following: ${req.body.friendName}`,date:new Moment()})
+        user.timeLine.unshift({description:`Started Following: ${req.body.friendName}`,date: moment()})
         user.save(err=>{
           if(err){
             res.json({
@@ -191,7 +191,6 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
 
   const {name,tasks} = req.body;
   const newProject= new Project({name,host:req.params.id,tasks})
-
   newProject.save(err=>{
     if(err){
       res.json({
@@ -207,7 +206,7 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
           })
         } else {
           user.projects.push(newProject._id)
-          user.timeLine.unshift({description:`Created Project: ${newProject.name}`,date:new Moment()})
+          user.timeLine.unshift({description:`Created Project: ${newProject.name}`,date:parseInt(moment().format('x'))})
           user.save(err=>{
             if(err){
               res.json({
@@ -254,7 +253,7 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
               })
             } else {
               user.projects.push(project._id)
-              user.timeLine.unshift({description:`Signed up for: ${project.name}`,date:new Moment()})
+              user.timeLine.unshift({description:`Signed up for: ${project.name}`,date:parseInt(moment().format('x'))})
               user.save(err=>{
                 if(err){
                   res.json({
