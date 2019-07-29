@@ -97,7 +97,7 @@ app.post('/api/register', (req,res)=>{
       name,
       email,
       hash,
-      timeLine:[{description:"Created Profile",date: moment()}]
+      timeLine:[{description:"Created Profile",date:parseInt(moment().format('x'))}]
     })
     newUser.save(err=>{
        if (err){
@@ -131,21 +131,21 @@ app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
         message: err,
       })
     } else {
-        user.friends.push(req.body.friendId)
-        user.timeLine.unshift({description:`Started Following: ${req.body.friendName}`,date: moment()})
-        user.save(err=>{
-          if(err){
-            res.json({
-              success: false,
-              message: err,
-            })
-          } else{
-            res.json({
-            success: true,
-            message: 'started following',
+      user.friends.push(req.body.friendId)
+      user.timeLine.unshift({description:`Started Following: ${req.body.friendName}`,date: parseInt(moment().format('x'))})
+      user.save(err=>{
+        if(err){
+          res.json({
+            success: false,
+            message: err,
           })
-          }
+        } else{
+          res.json({
+          success: true,
+          message: 'started following',
         })
+        }
+      })
     }
   })
 })
