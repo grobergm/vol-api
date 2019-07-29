@@ -5,7 +5,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-
+const Moment = require('moment')
 const saltRounds = 10;
 
 const env = require('./.env.js');
@@ -93,7 +93,7 @@ app.post('/api/register', (req,res)=>{
   const {name,email,password} = req.body;
   // needs to check if user exists already
   bcrypt.hash(password,saltRounds,function(err,hash){
-    const newUser= new User ({name,email,hash})
+    const newUser= new User ({name,email,hash,timeLine:[{description:"Created Profile",date:new Moment()}]})
     newUser.save(err=>{
        if (err){
         res.json({
@@ -105,6 +105,7 @@ app.post('/api/register', (req,res)=>{
           env.secret,
           { expiresIn: '24h' }
         );
+        console.log(newUser)
         res.json({
           success: true,
           message: 'Authentication successful!',
@@ -239,6 +240,7 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
               res.json({
               success: true,
               message: 'added new project',
+              project: newProject
             })
             }
           })
