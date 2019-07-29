@@ -93,7 +93,12 @@ app.post('/api/register', (req,res)=>{
   const {name,email,password} = req.body;
   // needs to check if user exists already
   bcrypt.hash(password,saltRounds,function(err,hash){
-    const newUser= new User ({name,email,hash,timeLine:[{description:"Created Profile",date:new Moment()}]})
+    const newUser= new User ({
+      name,
+      email,
+      hash,
+      timeLine:[{description:"Created Profile",date:new Moment()}]
+    })
     newUser.save(err=>{
        if (err){
         res.json({
@@ -117,35 +122,6 @@ app.post('/api/register', (req,res)=>{
   })
 });
 
-// add activity to timeline
-
-app.put('/api/users/timeline/:id',middleware.checkToken,(req,res)=>{
-  User.findOne({_id:req.params.id},(err,user)=>{
-    if(err){
-      res.json({
-        success: false,
-        message: err,
-      })
-    } else {
-      user.timeLine.unshift(req.body.activity)
-      user.save(err=>{
-        if(err){
-        res.json({
-          success: false,
-          message: err,
-        })
-        } else{
-          res.json({
-          success: true,
-          message: 'added activity',
-        })
-        }
-      })
-    }
-  })
-}) 
-
-
 // Follow a friend
 app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
   User.findOne({_id:req.params.id},(err,user)=>{
@@ -156,6 +132,7 @@ app.put('/api/follow/:id',middleware.checkToken,(req,res)=>{
       })
     } else {
         user.friends.push(req.body.friendId)
+        user.timeLine.unshift({description:`Started Following: ${req.body.friendName}`,date:new Moment()})
         user.save(err=>{
           if(err){
             res.json({
@@ -230,6 +207,7 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
           })
         } else {
           user.projects.push(newProject._id)
+          user.timeLine.unshift({description:`Created Project: ${newProject.name}`,date:new Moment()})
           user.save(err=>{
             if(err){
               res.json({
@@ -268,10 +246,31 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
             message: err,
           })
         } else{
-          res.json({
-          success: true,
-          message: 'signed up for project',
-        })
+           User.findOne({_id:req.params.id},(err,user)=>{
+            if(err){
+              res.json({
+                success: false,
+                message: err,
+              })
+            } else {
+              user.projects.push(project._id)
+              user.timeLine.unshift({description:`Signed up for: ${project.name}`,date:new Moment()})
+              user.save(err=>{
+                if(err){
+                  res.json({
+                    success: false,
+                    message: err,
+                  })
+                } else{
+                  res.json({
+                  success: true,
+                  message: 'added new project',
+                  project: newProject
+                })
+                }
+              })
+            }
+          })
         }
       })
     }
