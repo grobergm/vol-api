@@ -5,8 +5,8 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   hash: { type: String, required: true },
   timeLine:[],
-  friends:[{ type: mongoose.Schema.Types.ObjectId, ref:"User" }],
-  projects:[{ type: mongoose.Schema.Types.ObjectId, ref:"Project" }],
+  friends:[{ type: mongoose.Schema.Types.ObjectId, ref:"User"}],
+  projects:[{ type: mongoose.Schema.Types.ObjectId, ref:"Project"}],
 });
 
 module.exports = mongoose.model('User', UserSchema);

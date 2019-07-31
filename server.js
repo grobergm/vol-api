@@ -57,7 +57,13 @@ app.post('/api/authenticate', (req,res)=>{
   if (email && password){
     User.findOne({email})
     .populate('friends')
-    .populate('projects')
+    .populate({
+      path:'projects',
+      populate:{
+        path:'host',
+        select: 'name email'
+      }
+    })
     .exec((err,user)=>{
       if (err){
         res.json({
@@ -170,7 +176,12 @@ app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
 // Load Projects for Host ID 
 
 app.get('/api/projects/:id',(req,res)=>{
-  Project.find({host:req.params.id},(err,projects)=>{
+  Project.find({host:req.params.id})
+  .populate({
+    path:'host',
+    select: 'name email'
+  })
+  .exec((err,projects)=>{
     if(err){
       res.json({
         success: false,
@@ -197,7 +208,7 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
         success: false,
         message: err,
       })
-    } else {
+    } else { 
        User.findOne({_id:req.params.id},(err,user)=>{
         if(err){
           res.json({
@@ -214,11 +225,15 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
                 message: err,
               })
             } else{
-              res.json({
-              success: true,
-              message: 'added new project',
-              project: newProject
-            })
+            Project.populate(newProject,
+              {path:'host', select:'name email'},
+              (project)=>{
+                res.json({
+                  success: true,
+                  message: 'added new project',
+                  project: newProject
+                })
+              })
             }
           })
         }
@@ -230,6 +245,7 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
 // Sign up for a project (check token is used to add id to project)
 
 app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
+  console.log(req.body.projectId)
   Project.findOne({_id:req.body.projectId},(err,project)=>{
     if(err){
       res.json({
@@ -237,7 +253,7 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
         message: err,
       })
     } else {
-      project.volunteers.push(req.params.id)
+      project.volunteers.push(req.body.userName)
       project.save(err=>{
         if(err){
           res.json({
@@ -261,11 +277,15 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
                     message: err,
                   })
                 } else{
-                  res.json({
-                  success: true,
-                  message: 'added new project',
-                  project: newProject
-                })
+                  Project.populate(project,
+                    {path:'host', select:'name email'},
+                    (newProject)=>{
+                      res.json({
+                        success: true,
+                        message: 'added new project',
+                        project: project
+                      })
+                  })
                 }
               })
             }
