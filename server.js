@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const moment = require('moment')
 const saltRounds = 10;
 
-const env = require('./.env.js');
 const middleware = require('./middleware');
 const User = require('./models/User');
 const Project = require('./models/Project');
@@ -18,7 +17,7 @@ const port = 8000;
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongo_uri = `mongodb+srv://grobergm:${env.dbPass}@volnetdb-oplmq.mongodb.net/vol-net-data?retryWrites=true&w=majority`;
+const mongo_uri = `mongodb+srv://grobergm:${process.env.DB_PASS}@volnetdb-oplmq.mongodb.net/vol-net-data?retryWrites=true&w=majority`;
 mongoose.connect(mongo_uri, { useNewUrlParser: true }, function(err) {
   if (err) {
     throw err;
@@ -79,7 +78,7 @@ app.post('/api/authenticate', (req,res)=>{
         bcrypt.compare(password, user.hash, function(err, validPassword) {
           if (validPassword){
             let token = jwt.sign({id:user._id},
-              env.secret,
+              process.env.SECRET,
               { expiresIn: '24h' }
             );
             res.json({
@@ -113,10 +112,9 @@ app.post('/api/register', (req,res)=>{
         })
       } else {
         let token = jwt.sign({id:newUser._id},
-          env.secret,
+          process.env.SECRET,
           { expiresIn: '24h' }
         );
-        console.log(newUser)
         res.json({
           success: true,
           message: 'Authentication successful!',
@@ -245,7 +243,6 @@ app.post('/api/projects/:id',middleware.checkToken,(req,res)=>{
 // Sign up for a project (check token is used to add id to project)
 
 app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
-  console.log(req.body.projectId)
   Project.findOne({_id:req.body.projectId},(err,project)=>{
     if(err){
       res.json({
@@ -298,78 +295,78 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
 
 // assign volunteer to task
 
-app.put('/api/projects/assign/:id',middleware.checkToken,(req,res)=>{
-  Project.findOne({_id:req.body.projectId},(err,project)=>{
-    if(err){
-      res.json({
-        success: false,
-        message: err,
-      })
-    } else {
-      project.tasks[req.body.taskId].volunteers.unshift(req.body.volunteerId)
-      project.save(err=>{
-        if(err){
-          res.json({
-            success: false,
-            message: err,
-          })
-        } else{
-          res.json({
-          success: true,
-          message: 'Assigned volunteer to project',
-        })
-        }
-      })
-    }
-  })
-})
+// app.put('/api/projects/assign/:id',middleware.checkToken,(req,res)=>{
+//   Project.findOne({_id:req.body.projectId},(err,project)=>{
+//     if(err){
+//       res.json({
+//         success: false,
+//         message: err,
+//       })
+//     } else {
+//       project.tasks[req.body.taskId].volunteers.unshift(req.body.volunteerId)
+//       project.save(err=>{
+//         if(err){
+//           res.json({
+//             success: false,
+//             message: err,
+//           })
+//         } else{
+//           res.json({
+//           success: true,
+//           message: 'Assigned volunteer to project',
+//         })
+//         }
+//       })
+//     }
+//   })
+// })
 
-// mark task as complete
+// // mark task as complete
 
-app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
-  Project.findOne({_id:req.body.projectId},(err,project)=>{
-    if(err){
-      res.json({
-        success: false,
-        message: err,
-      })
-    } else {
-      project.tasks[req.body.taskId].complete=true;
-      project.save(err=>{
-        if(err){
-          res.json({
-            success: false,
-            message: err,
-          })
-        } else{
-          res.json({
-          success: true,
-          message: 'Task is complete',
-        })
-        }
-      })
-    }
-  })
-})
+// app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
+//   Project.findOne({_id:req.body.projectId},(err,project)=>{
+//     if(err){
+//       res.json({
+//         success: false,
+//         message: err,
+//       })
+//     } else {
+//       project.tasks[req.body.taskId].complete=true;
+//       project.save(err=>{
+//         if(err){
+//           res.json({
+//             success: false,
+//             message: err,
+//           })
+//         } else{
+//           res.json({
+//           success: true,
+//           message: 'Task is complete',
+//         })
+//         }
+//       })
+//     }
+//   })
+// })
 
 
 
 // Delete a project
-app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
-  Project.findOneAndDelete({host:req.params.id},(err)=>{
-    if(err){
-      res.json({
-        success: false,
-        message: err,
-      })
-    } else {
-      res.json({
-        success: true,
-        message: "Project Deleted",
-      })
-    }
-  })
-})
+// app.delete('/api/users/:id',middleware.checkToken,(req,res)=>{
+//   Project.findOneAndDelete({host:req.params.id},(err)=>{
+//     if(err){
+//       res.json({
+//         success: false,
+//         message: err,
+//       })
+//     } else {
+//       res.json({
+//         success: true,
+//         message: "Project Deleted",
+//       })
+//     }
+//   })
+// })
 
 
 app.listen(port, () => console.log(`Server is listening on port: ${port}`));

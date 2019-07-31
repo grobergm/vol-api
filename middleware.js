@@ -1,5 +1,4 @@
 let jwt = require('jsonwebtoken');
-const env = require('./.env.js');
 
 // needs to authorize post with id of logged in user
 
@@ -12,7 +11,7 @@ let checkToken = (req, res, next) => {
       token = token.slice(7, token.length);
     }
 
-    jwt.verify(token, env.secret, (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
       if (err) {
         return res.json({
           success: false,

@@ -8,6 +8,8 @@ Matt Groberg
 
 ## Description
 
+[Visit App]()
+
 Volunteer Network is a single page (full stack) app for coordinating volunteer projects. The Goal is to make it easy to start projects, track volunteers, and have a profile that shows a summary of your volunteer experiences. 
 
 In this app, users can:
@@ -43,7 +45,8 @@ This is an open source app, and if you would like to be a contributor, send me a
 3. Add Bootstrap progress bar to projects based on number of completed tasks
 4. Add Google Maps API to show location of projects
 5. Add more Profile information (such as goals, and summary of timeline activities)
-
-
+6. Prevent user from signing up for a project multiple times, or following someone multiple times.
+7. Add bootstrap alerts for messages received from server (green if res.success, red if !res.success)
+8. Use Service Workers and Local Storage to allow app to be used offline
 ### Legal
 MIT Licence (c) Matthew Groberg 2019
