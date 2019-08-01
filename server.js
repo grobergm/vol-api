@@ -366,4 +366,4 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
 // })
 
 
-app.listen(process.env.PORT || 8000, () => console.log(`Server is listening on port: ${port}`));
+app.listen(process.env.PORT || 8000, () => console.log(`Server is listening`));
