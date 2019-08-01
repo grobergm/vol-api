@@ -16,7 +16,7 @@ const port = 8000;
 
 app.use(cors());
 app.use(bodyParser.json());
-
+console.log(process.env.DB_PASS)
 const mongo_uri = `mongodb+srv://grobergm:${process.env.DB_PASS}@volnetdb-oplmq.mongodb.net/vol-net-data?retryWrites=true&w=majority`;
 mongoose.connect(mongo_uri, { useNewUrlParser: true }, function(err) {
   if (err) {
