@@ -12,8 +12,6 @@ const middleware = require('./middleware');
 const User = require('./models/User');
 const Project = require('./models/Project');
 
-const port = 8000;
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -368,4 +366,4 @@ app.put('/api/projects/signup/:id',middleware.checkToken,(req,res)=>{
 // })
 
 
-app.listen(port, () => console.log(`Server is listening on port: ${port}`));
+app.listen(process.env.PORT || 8000, () => console.log(`Server is listening on port: ${port}`));
